@@ -17,11 +17,21 @@ type SceneSpec = {
  * paint it. Not an animation — a barrier, so `film.frame(t)` resolves on pixels
  * that are actually on screen. Without it a freshly mounted clip can be
  * screenshotted (by Studio or by an export) before its first paint, which shows
- * up as a blank or black frame right after a cut. */
+ * up as a blank frame right after a cut.
+ *
+ * Bounded on purpose: a hidden tab stops `requestAnimationFrame`, and a seek
+ * that waits on one would never resolve. 120 ms is longer than a frame at
+ * 30 fps, so a visible page always gets its paint first. */
 const nextPaint = () =>
-  new Promise<void>((resolve) =>
-    requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
-  );
+  new Promise<void>((resolve) => {
+    const timer = setTimeout(resolve, 120);
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        clearTimeout(timer);
+        resolve();
+      }),
+    );
+  });
 type Film = {width: number; height: number; duration: number; ready: Promise<void>; frame(t: number): Promise<void>};
 
 export function mountScene({scene, offset, duration, total, video, Content, settle = nextPaint}: SceneSpec) {

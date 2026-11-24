@@ -10,7 +10,7 @@ import {chromium} from 'playwright-core';
 const root = fileURLToPath(new URL('../', import.meta.url));
 const template = path.join(root, 'projects', 'Remotion-Template');
 const nativeSource = path.join(root, 'projects', 'OpenFilm-Native', 'film.html');
-const original = [template, path.join(root, 'projects', 'ThreeDemo'), path.join(root, 'projects', 'Product-Film')].map(p => path.join(p, 'film.html'));
+const original = [template, path.join(root, 'projects', 'ThreeDemo')].map(p => path.join(p, 'film.html'));
 original.push(nativeSource);
 const before = await Promise.all(original.map(p => readFile(p, 'utf8')));
 await import('./build.mjs');
@@ -38,11 +38,8 @@ try {
   const fullPackage = JSON.parse(await readFile(path.join(full, 'package.json'), 'utf8'));
   assert.ok(fullPackage.dependencies.remotion && fullPackage.dependencies.openfilm);
   for (const file of [
-    'adapter/mount-scene.tsx', 'adapter/product.tsx', 'template/src/Root.tsx', 'scripts/studio.mjs',
-    'films/product/ProductShot.tsx', 'assets/models/boombox.glb', 'assets/models/water-bottle.glb',
+    'adapter/mount-scene.tsx', 'template/src/Root.tsx', 'scripts/studio.mjs',
     'projects/Remotion-Template/film.html', 'projects/ThreeDemo/film.html',
-    'projects/Product-Film/film.html', 'projects/Product-Film/product-shot.json',
-    'projects/Product-Film/native/title.html',
     'projects/OpenFilm-Native/film.html', 'projects/OpenFilm-Native/motion-kit/editorial.html',
     'projects/OpenFilm-Native/public/brand/IBMPlexSansSC-Regular.woff2',
     'projects/OpenFilm-Native/assets/brand/watermarks/guanglun_full-color/16x9/logo_16x9_BR.png',
@@ -51,10 +48,6 @@ try {
   }
   await assert.rejects(stat(path.join(full, '.studio')), {code: 'ENOENT'});
   await assert.rejects(stat(path.join(full, 'projects', 'Remotion-Template', 'scenes', 'page.js')), {code: 'ENOENT'});
-  // The product film's bundles and copied models are build output, not state.
-  await assert.rejects(stat(path.join(full, 'projects', 'Product-Film', 'scenes', 'product.js')), {code: 'ENOENT'});
-  await assert.rejects(stat(path.join(full, 'projects', 'Product-Film', 'scenes', 'shot.js')), {code: 'ENOENT'});
-  await assert.rejects(stat(path.join(full, 'projects', 'Product-Film', 'public', 'models')), {code: 'ENOENT'});
   console.log('PASS default new command copies the complete studio template');
 
   const native = path.join(temp, 'native');

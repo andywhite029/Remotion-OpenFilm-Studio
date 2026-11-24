@@ -2,7 +2,7 @@
 
 **剪辑和最终导出只走 OpenFilm。** Remotion 保留为可选的镜头制作工具，而不是另一套成片时间轴。项目锁定 OpenFilm 0.4.1 和 Remotion 4.0.541，原母版 `D:\vscode\Remotion模板` 未修改。
 
-## 先试几条路线
+## 先试两种路线
 
 安装 Node.js 24（含 npm）后，双击本目录的 `启动Studio.cmd` 即可启动 Studio 并打开浏览器。也可以在终端运行 `npm start`，然后打开终端打印的地址。两种方式都会检查项目依赖和 Chromium，首次需要下载时请保持联网。同版本 Chromium 可以在本机的多个副本之间共用。
 
@@ -11,7 +11,6 @@
 | 继续用已有 Remotion 模板 | `npm start` | 五个可单独裁剪和编辑的 Remotion 镜头 |
 | 试试纯 OpenFilm | `npm start -- --project OpenFilm-Native` | 两个原生页面镜头，跳过 Remotion 构建 |
 | 看 3D 能否接进来 | `npm start -- --project ThreeDemo` | 一个 Remotion / React Three Fiber 镜头及 DOM 叠层 |
-| 看一条 15 秒产品片 | `npm start -- --project Product-Film` | 原生标题卡 → 真实 GLB 产品 3D → 参数图表 |
 
 打开终端打印的本机 Studio 地址（含访问凭据，请勿分享）。默认使用 4849/4850；若并行开副本，可以在其终端先设置 `$env:REMOTION_STUDIO_PORT=4855`。Ctrl+C 停止服务。
 
@@ -43,52 +42,11 @@ npm run new -- D:\vscode\MyOpenFilm
 
 - `projects/<项目>/film.html`：唯一成片时间轴，包含轨道、裁切、镜头位置和人工覆盖。
 - `template/src/`：Remotion 镜头源码；`template/src/timeline.ts` 定义的是源镜头帧区间和初始剪辑，不会在后续构建中重铺 Studio 时间轴。
-- `adapter/`：把 OpenFilm 的镜头秒数映射到 Remotion Player 的帧，等待 React 提交、图片和字体。2D 与 ThreeDemo 分开打包，普通镜头不加载 3D 依赖。
-- `films/product/`：产品片的 Remotion 镜头（GLB 转台与参数图表）和四个参数的校验。它派生自模板、只复用 `template/src` 的设计令牌与组件，母版 `template/` 保持原样。
-- `assets/models/`：GLB 源文件与许可说明。
+- `adapter/`：把 OpenFilm 的镜头秒数映射到 Remotion Player 的帧，等待 React 提交、图片和字体；每次 seek 在提交后还会等两帧合成，不会截到未绘制的画面。2D 与 ThreeDemo 分开打包，普通镜头不加载 3D 依赖。
 - `projects/OpenFilm-Native/scenes/`：原生镜头源码；直接改文件再刷新，无需构建。
 - `.studio/`、`exports/`：本机服务状态、凭据和导出的视频。
 
 改 Remotion 源码后运行 `npm run build` 再刷新 Studio。构建只在 `film.html` 缺失时创建初始剪辑。如果源镜头时长变化，需要检查 Studio 上已有片段的入点和出点。不要删除有人工编辑的 `film.html` 来同步源码。
-
-## 产品 3D 镜头：一条 15 秒产品片
-
-`projects/Product-Film` 是第一轮的交付样本：**原生标题卡（3 s）→ 真实 GLB 产品 3D（6 s）→ 参数图表（6.5 s）**，底片 15.5 秒。在 Studio 里裁掉 3D 镜头开头 0.5 秒（产品刚起转）、把图表跟上来，成片正好 15.0 秒。产品模型、贴图、材质和相机都在 Three.js 里，旋转由 Remotion 的帧号驱动。导出的成片在 `exports/product-film-15s.mp4`（1920×1080、H.264、30fps、450 帧、15.000 秒）。
-
-```powershell
-npm start -- --project Product-Film
-```
-
-### 四个参数，一份数据
-
-3D 镜头只开放四个参数，AI 和剪辑师改的是同一份 `projects/Product-Film/product-shot.json`：
-
-| 参数 | 作用 | 取值 |
-|---|---|---|
-| `model` | 用哪个 GLB | `boombox` / `water-bottle`（在 `films/product/models.ts` 加一行即新增） |
-| `title` | 画面标题，同时写进原生标题卡 | 1–48 字 |
-| `speed` | 转台转速，按帧计算 | 0–180 °/s |
-| `distance` | 相机距离，等于推拉 | 2.6–7 |
-
-```powershell
-npm run shot -- --model water-bottle --title AQUA --speed 70 --distance 3.6
-npm run shot -- --print          # 只看当前参数，不写文件
-npm run test:product             # 这条产品片的端到端验收
-```
-
-`scripts/product-shot.mjs` 只写 `product-shot.json` 和生成的 `scenes/shot.js`：不重新打包，也不碰 `film.html`。因此 Studio 里改过的文案、裁切和层级都会保留，刷新浏览器就能看到新镜头。材质和灯光仍由源码控制（`films/product/ProductStage.tsx`、`ProductModel.tsx`），它们是美术方向，不属于可开放参数。
-
-`scenes/shot.js` 里同时带上所选模型的 `label` / `spec`，所以 3D HUD 和原生标题卡读的是同一份数据：换模型会一起改掉两处的名字和规格。标题卡本身仍是可编辑的 HTML，Studio 里改过的文字覆盖优先于这份数据。
-
-### 加载等待
-
-GLB 和贴图在 Remotion Player 挂载**之前**加载完成（`films/product/load-model.ts`），所以 `window.film.ready` 已经包含模型解码。从时间线中间开始预览、来回拖动、裁切后导出，第一帧就是完整产品，不会先出现空场景。加载期间页面显示 `#boot` 占位，提交首帧后移除。
-
-两个和切镜有关的细节：每个生成的页面都在 `<head>` 里先铺自己的底色（`scripts/build.mjs` 的 `ground`），所以新片段挂载、bundle 还没执行的那一两帧不会漏出宿主的黑色底；每次 seek 在 React 提交后还要等两帧合成（`adapter/mount-scene.tsx` 的 `nextPaint`），预览截图和导出拿到的是同一张画面。
-
-### 模型与许可
-
-`assets/models/` 的两个 GLB 来自 Khronos glTF-Sample-Assets（BoomBox CC BY 4.0 / Microsoft，WaterBottle CC0）。2048² PNG 贴图已压成 1024² JPEG（10.6 MB → 465 KB，8.9 MB → 332 KB），不做网格压缩，所以渲染端不需要额外解码器。来源、许可和压缩方法见 [模型说明](assets/models/README.md)。
 
 ## 品牌素材与动效选型
 
@@ -120,17 +78,14 @@ GLB 和贴图在 Remotion Player 挂载**之前**加载完成（`films/product/l
 
 - 五镜头版没有复制原 `Main` 的跨镜头淡化、全局页脚和 LowerThird。`scenes/main.html` 保留完整构图，但作为单个片段时不能逐镜头裁剪；需要逐镜编辑和完整效果时，应在 Studio 补跨镜过渡与独立叠层。
 - 人工文字、位移、样式改动保存在片段的 `overrides`，不会反写 TSX。现有 DOM 路径 ID 保持兼容，但重构结构可能使覆盖失效；新镜头的重要文字、卡片和图形请写语义 `id`。
-- Remotion 页按源 30fps 取帧；把成片导成 60fps 不会为这些镜头补出新的动画中间帧。需要连续子帧采样的新动效可优先用原生页面。产品 3D 镜头已内置 GLB 与贴图就绪等待；其他镜头里的网页视频、远程字体和 `delayRender` 仍需逐镜补就绪处理并验证。
-- Studio 不能像 DOM 一样拖动 Canvas 内的网格、材质和灯光。要改 3D 对象，请改镜头源码；模型和相机距离可通过 `npm run shot` 换，DOM 叠层和整个镜头仍可编排。音频请加到 Studio 音轨，页面内音频不会自动迁移。人工样式覆盖也不会跑 Remotion 模板的对比度检查。
-- OpenCV 跟踪（标注跟随产品）按计划暂缓：等有实拍跟踪素材再接，不影响现有时间线。
-- 宿主在片段开始时才挂载页面，所以 Remotion 片段（打包后约 1.5–3.7 MB）首次挂载要 0.2–0.4 秒。这段时间页面先铺自己的纸色底，观感是一次白场呼吸，而不是黑闪。要完全消掉，可以在剪辑时给前一镜尾巴多留 0.3 秒，或等 OpenFilm 提供片段预挂载。
+- Remotion 页按源 30fps 取帧；把成片导成 60fps 不会为这些镜头补出新的动画中间帧。需要连续子帧采样的新动效可优先用原生页面。异步 GLB、网页视频、远程字体和 `delayRender` 不在现有适配保证内，需要逐镜补就绪处理并验证。
+- Studio 不能像 DOM 一样拖动 Canvas 内的网格、材质和灯光。要改 3D 对象，请改镜头源码；DOM 叠层和整个镜头仍可编排。音频请加到 Studio 音轨，页面内音频不会自动迁移。人工样式覆盖也不会跑 Remotion 模板的对比度检查。
+- 宿主在片段开始时才挂载页面，所以 Remotion 片段首次挂载要 0.2–0.4 秒。每个生成的页面在 `<head>` 里先铺自己的底色，这段时间是纸色呼吸而不是黑底闪烁；要完全消掉，可以在剪辑时给前一镜尾巴多留 0.3 秒，或等 OpenFilm 提供片段预挂载。
 - OpenFilm 的 MIT 许可不改变 Remotion 等其他依赖的许可。
 
 ## 验证
 
 推荐先跑 `npm run test:workflows`。它用临时项目启动 Studio，检查构建不改时间轴、原生副本不依赖 Remotion、原生小数时间采样和反向 seek，以及混合时间轴的覆盖保存、重载、WebGL 预览和 H.264 导出，不会编辑当前项目的 `film.html`。它还会从空目录新建一个纯 OpenFilm 副本并真跑一次 `npm ci`：0.4.1 升级后曾出现锁文件仍停在 0.3.2、全新安装直接 EUSAGE 的问题，这条检查就是那次回归的守卫。需要上述 Chromium 和可用的 FFmpeg。
-
-`npm run test:product` 验收产品片这一条：从干净时间线开始、第一次 seek 落在 3D 中段即可见完整产品、来回拖动与重新加载逐像素一致、改文案和裁切后重载仍保留、换模型生成第二个版本、最后导出 H.264。像素用 ffmpeg 读取，和导出的结果保持一致。
 
 旧的单项验证仍可在另一个终端启动默认混合项目后执行。它们会生成测试状态，不要与正在进行的人工剪辑同时运行。
 

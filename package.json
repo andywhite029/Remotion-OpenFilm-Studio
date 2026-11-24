@@ -8,9 +8,7 @@
     "studio": "node scripts/studio.mjs",
     "start": "node scripts/studio.mjs --init --build",
     "new": "node scripts/new-project.mjs",
-    "shot": "node scripts/product-shot.mjs",
     "test": "node scripts/verify.mjs",
-    "test:product": "node scripts/verify-product.mjs",
     "test:workflows": "node scripts/verify-workflows.mjs"
   },
   "dependencies": {
