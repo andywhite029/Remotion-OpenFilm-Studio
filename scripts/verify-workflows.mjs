@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {execFileSync} from 'node:child_process';
+import {execFileSync, spawnSync} from 'node:child_process';
 import {cp, mkdir, mkdtemp, readFile, realpath, rm, stat, writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import path from 'node:path';
@@ -10,11 +10,24 @@ import {chromium} from 'playwright-core';
 const root = fileURLToPath(new URL('../', import.meta.url));
 const template = path.join(root, 'projects', 'Remotion-Template');
 const nativeSource = path.join(root, 'projects', 'OpenFilm-Native', 'film.html');
-const original = [template, path.join(root, 'projects', 'ThreeDemo')].map(p => path.join(p, 'film.html'));
+const original = [template, path.join(root, 'projects', 'ThreeDemo'), path.join(root, 'projects', 'Product-Film')].map(p => path.join(p, 'film.html'));
 original.push(nativeSource);
 const before = await Promise.all(original.map(p => readFile(p, 'utf8')));
 await import('./build.mjs');
 assert.deepEqual(await Promise.all(original.map(p => readFile(p, 'utf8'))), before, 'Build changed a saved timeline');
+
+// `npm start` runs exactly this when a fresh copy has no node_modules. A stale
+// lockfile next to a newer pin fails it with EUSAGE, so the first-run path is
+// part of the contract, not just the lockfile's shape. Prefer the npm cache so
+// the check stays offline after one normal install; fall back to the network.
+function cleanInstall(folder) {
+  const npm = process.env.npm_execpath;
+  const args = ['ci', '--ignore-scripts', '--prefer-offline', '--no-audit'];
+  const result = npm
+    ? spawnSync(process.execPath, [npm, ...args], {cwd: folder, stdio: 'inherit'})
+    : spawnSync(process.platform === 'win32' ? 'npm.cmd' : 'npm', args, {cwd: folder, stdio: 'inherit', shell: process.platform === 'win32'});
+  assert.equal(result.status, 0, `Clean install failed in ${folder}`);
+}
 
 const tempParent = await realpath(tmpdir());
 const temp = await mkdtemp(path.join(tempParent, 'openfilm-workflows-'));
@@ -25,8 +38,11 @@ try {
   const fullPackage = JSON.parse(await readFile(path.join(full, 'package.json'), 'utf8'));
   assert.ok(fullPackage.dependencies.remotion && fullPackage.dependencies.openfilm);
   for (const file of [
-    'adapter/mount-scene.tsx', 'template/src/Root.tsx', 'scripts/studio.mjs',
+    'adapter/mount-scene.tsx', 'adapter/product.tsx', 'template/src/Root.tsx', 'scripts/studio.mjs',
+    'films/product/ProductShot.tsx', 'assets/models/boombox.glb', 'assets/models/water-bottle.glb',
     'projects/Remotion-Template/film.html', 'projects/ThreeDemo/film.html',
+    'projects/Product-Film/film.html', 'projects/Product-Film/product-shot.json',
+    'projects/Product-Film/native/title.html',
     'projects/OpenFilm-Native/film.html', 'projects/OpenFilm-Native/motion-kit/editorial.html',
     'projects/OpenFilm-Native/public/brand/IBMPlexSansSC-Regular.woff2',
     'projects/OpenFilm-Native/assets/brand/watermarks/guanglun_full-color/16x9/logo_16x9_BR.png',
@@ -35,14 +51,35 @@ try {
   }
   await assert.rejects(stat(path.join(full, '.studio')), {code: 'ENOENT'});
   await assert.rejects(stat(path.join(full, 'projects', 'Remotion-Template', 'scenes', 'page.js')), {code: 'ENOENT'});
+  // The product film's bundles and copied models are build output, not state.
+  await assert.rejects(stat(path.join(full, 'projects', 'Product-Film', 'scenes', 'product.js')), {code: 'ENOENT'});
+  await assert.rejects(stat(path.join(full, 'projects', 'Product-Film', 'scenes', 'shot.js')), {code: 'ENOENT'});
+  await assert.rejects(stat(path.join(full, 'projects', 'Product-Film', 'public', 'models')), {code: 'ENOENT'});
   console.log('PASS default new command copies the complete studio template');
 
   const native = path.join(temp, 'native');
   execFileSync(process.execPath, [path.join(root, 'scripts/new-project.mjs'), native, '--native'], {stdio: 'inherit'});
   const pkg = JSON.parse(await readFile(path.join(native, 'package.json'), 'utf8'));
   const lock = JSON.parse(await readFile(path.join(native, 'package-lock.json'), 'utf8'));
+  const templatePackage = JSON.parse(await readFile(path.join(root, 'package.json'), 'utf8'));
+  const starterPackage = JSON.parse(await readFile(path.join(root, 'starters', 'openfilm', 'package.json'), 'utf8'));
+  const pin = pkg.dependencies.openfilm;
   assert.deepEqual(Object.keys(pkg.dependencies), ['openfilm']);
-  assert.deepEqual(Object.keys(lock.packages).sort(), ['', 'node_modules/openfilm', 'node_modules/playwright-core']);
+  assert.equal(starterPackage.dependencies.openfilm, templatePackage.dependencies.openfilm,
+    'Native starter and full template must pin the same OpenFilm version');
+  assert.equal(lock.packages[''].dependencies.openfilm, pin, 'Native starter lockfile disagrees with its package.json');
+  assert.equal(lock.packages['node_modules/openfilm'].version, pin, 'Native starter lockfile resolves an older OpenFilm');
+  assert.equal(lock.packages['node_modules/openfilm'].resolved, `https://registry.npmjs.org/openfilm/-/openfilm-${pin}.tgz`);
+  assert.ok(lock.packages['node_modules/openfilm'].integrity, 'Native starter lockfile has no integrity for OpenFilm');
+  assert.deepEqual(Object.keys(lock.packages).filter(key => key && !key.startsWith('node_modules/')), [],
+    'Every non-root lock entry must be an installed package');
+  // The acceptance criterion for a fresh copy: one install, then Studio exists.
+  cleanInstall(native);
+  const installed = JSON.parse(await readFile(path.join(native, 'node_modules/openfilm/package.json'), 'utf8'));
+  assert.equal(installed.version, pin, 'Clean install produced a different OpenFilm version');
+  assert.ok((await stat(path.join(native, 'node_modules/openfilm/studio/ui/dist'))).isDirectory(),
+    'Installed OpenFilm is missing the Studio UI');
+  console.log('PASS clean native install from an empty folder starts from one npm ci');
   await assert.rejects(stat(path.join(native, 'adapter')), {code: 'ENOENT'});
   const nativeProject = path.join(native, 'projects', 'OpenFilm-Native');
   await assert.rejects(stat(path.join(nativeProject, '.film', 'id')), {code: 'ENOENT'});

@@ -42,6 +42,13 @@ const studioState = new Set(['settings.json', 'markers.json', 'subtitles.json'])
 const generated = new Set(['Remotion-Template', 'ThreeDemo'].flatMap(name =>
   ['scenes/page.js', 'public/brand', 'assets/brand/watermarks'].map(file => `projects/${name}/${file}`)));
 generated.add('projects/Remotion-Template/motion-kit');
+// The product film's bundles, data file and copied assets are rebuilt on the
+// first `npm start` in the copy, so they are not state worth copying.
+generated.add('projects/Product-Film/public');
+generated.add('projects/Product-Film/assets/brand');
+for (const file of ['product.js', 'metrics.js', 'shot.js']) {
+  generated.add(`projects/Product-Film/scenes/${file}`);
+}
 const copyable = (p) => {
   const rel = path.relative(source, p).split(path.sep);
   const item = rel.at(-1);

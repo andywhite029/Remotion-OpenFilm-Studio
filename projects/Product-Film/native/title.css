@@ -1,0 +1,87 @@
+/* The title card's look.
+ *
+ * Values mirror the LIGHT palette in `template/src/theme.ts`. A native scene
+ * cannot import design tokens, so they are repeated here — keep them in step
+ * with the Remotion shots, or the cut at 3 s will shift the white.
+ */
+:root {
+  --paper: #ffffff;
+  --canvas: #eceef2;
+  --text: #101418;
+  --text-secondary: #5b6472;
+  --text-tertiary: #6b7280;
+  --accent: #7c3aed;
+  --accent-bright: #8b5cf6;
+  --border-subtle: #eef0f4;
+}
+
+* { box-sizing: border-box; }
+/* Painted before the stage exists: a clip that is mounted but not yet painted
+   must show paper, not the film host's black backdrop. */
+body { margin: 0; overflow: hidden; background: var(--canvas); }
+
+.stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100vw;
+  height: 100vh;
+  padding: 0 9vw;
+  isolation: isolate;
+  font-family: var(--brand-font, sans-serif);
+  color: var(--text);
+  background: radial-gradient(120% 90% at 50% 38%, var(--paper) 0%, var(--canvas) 74%);
+}
+
+.kicker {
+  color: var(--accent);
+  font: 700 1.4vw/1.4 ui-monospace, monospace;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 3.2vh 0 0;
+  font-size: 11vw;
+  line-height: 1;
+  letter-spacing: -0.035em;
+  font-weight: 700;
+}
+
+p {
+  margin: 3.4vh 0 0;
+  color: var(--text-secondary);
+  font-size: 1.9vw;
+}
+
+.rule {
+  width: 16vw;
+  height: 4px;
+  margin-top: 4vh;
+  background: var(--accent-bright);
+  transform-origin: left center;
+}
+
+.mark {
+  position: absolute;
+  width: 22vw;
+  aspect-ratio: 1;
+  right: 10vw;
+  top: 12vh;
+  z-index: -1;
+  border: 4px solid var(--border-subtle);
+  border-radius: 26%;
+}
+
+.meta {
+  position: absolute;
+  left: 9vw;
+  right: 9vw;
+  bottom: 7vh;
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-tertiary);
+  font: 600 1.1vw/1.4 ui-monospace, monospace;
+  letter-spacing: 0.14em;
+}

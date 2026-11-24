@@ -8,10 +8,23 @@ type Video = {WIDTH: number; HEIGHT: number; FPS: number};
 type SceneSpec = {
   scene: string; offset: number; duration: number; total: number;
   video: Video; Content: ComponentType;
+  /** Extra barrier run after a frame is committed, before `film.frame(t)` resolves.
+   * Defaults to a paint barrier; pass a longer one if a scene needs more. */
+  settle?: () => Promise<void> | void;
 };
+
+/** Two animation frames: one commits the draw, the next lets the compositor
+ * paint it. Not an animation — a barrier, so `film.frame(t)` resolves on pixels
+ * that are actually on screen. Without it a freshly mounted clip can be
+ * screenshotted (by Studio or by an export) before its first paint, which shows
+ * up as a blank or black frame right after a cut. */
+const nextPaint = () =>
+  new Promise<void>((resolve) =>
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+  );
 type Film = {width: number; height: number; duration: number; ready: Promise<void>; frame(t: number): Promise<void>};
 
-export function mountScene({scene, offset, duration, total, video, Content}: SceneSpec) {
+export function mountScene({scene, offset, duration, total, video, Content, settle = nextPaint}: SceneSpec) {
   const host = window as Window & {remotion_staticBase: string; film: Film};
   const {WIDTH, HEIGHT, FPS} = video;
   const player = createRef<PlayerRef>();
@@ -49,6 +62,8 @@ export function mountScene({scene, offset, duration, total, video, Content}: Sce
     if (error) throw error;
     await document.fonts.ready;
     identify();
+    // The poster only goes away once there is a committed frame behind it.
+    document.getElementById('boot')?.remove();
   })();
   let tail = Promise.resolve();
   host.film = {
@@ -64,6 +79,7 @@ export function mountScene({scene, offset, duration, total, video, Content}: Sce
         identify();
         await Promise.all([...document.images].map(img => img.decode().catch(() => { throw new Error(`Image failed: ${img.src}`); })));
         await document.fonts.ready;
+        await settle();
       });
       // Reject this request, but still allow a later seek past a bad frame.
       tail = task.catch(() => {});
