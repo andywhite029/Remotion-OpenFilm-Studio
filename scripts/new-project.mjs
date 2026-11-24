@@ -37,7 +37,7 @@ try {
   if (error.code !== 'ENOENT') throw error;
 }
 
-const exclude = new Set(['node_modules', 'vendor', '.git', '.studio', 'exports', 'verification', '_smoke']);
+const exclude = new Set(['node_modules', 'vendor', '.git', '.studio', 'exports', 'verification', '_smoke', 'Saved']);
 const studioState = new Set(['settings.json', 'markers.json', 'subtitles.json']);
 const generated = new Set(['Remotion-Template', 'ThreeDemo'].flatMap(name =>
   ['scenes/page.js', 'public/brand', 'assets/brand/watermarks'].map(file => `projects/${name}/${file}`)));

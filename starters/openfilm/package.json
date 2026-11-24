@@ -7,6 +7,6 @@
     "start": "node scripts/studio.mjs --init --project OpenFilm-Native"
   },
   "dependencies": {
-    "openfilm": "0.3.2"
+    "openfilm": "0.4.1"
   }
 }

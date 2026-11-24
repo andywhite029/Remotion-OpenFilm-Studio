@@ -1,6 +1,6 @@
 # Remotion 镜头 × OpenFilm Studio
 
-**剪辑和最终导出只走 OpenFilm。** Remotion 保留为可选的镜头制作工具，而不是另一套成片时间轴。项目锁定 OpenFilm 0.3.2 和 Remotion 4.0.541，原母版 `D:\vscode\Remotion模板` 未修改。
+**剪辑和最终导出只走 OpenFilm。** Remotion 保留为可选的镜头制作工具，而不是另一套成片时间轴。项目锁定 OpenFilm 0.4.1 和 Remotion 4.0.541，原母版 `D:\vscode\Remotion模板` 未修改。
 
 ## 先试两种路线
 
@@ -51,6 +51,28 @@ npm run new -- D:\vscode\MyOpenFilm
 ## 品牌素材与动效选型
 
 项目已接入 **IBM Plex Sans SC** 和公司的官方水印原图；字体随项目携带，两套示例都把水印放在独立的 Studio 顶层轨道，可单独替换图样和时长。新片的色调、布局、节奏和转场按内容决定。原生、混合项目都可以在素材面板选用 [三种镜头级动效](projects/OpenFilm-Native/motion-kit/README.md)：编辑型揭幕、数据描线、产品局部聚焦。这三种页面按项目需要加入时间轴。水印在 [品牌资产说明](projects/OpenFilm-Native/public/brand/README.md) 中有完整选法和对齐规则。
+
+## OpenFilm 0.4 新增能力
+
+从 0.3.2 升到 0.4.1 后，下面这些能力直接在 Studio 里可用，不需要改现有时间轴。
+
+| 能力 | 怎么用 | 落在哪里 |
+|---|---|---|
+| 入点 / 出点 | `I` 设入点、`O` 设出点（0.3.2 起就有，非新增） | 时间区域高亮，状态栏显示 `00:00:00 – 00:07:00` |
+| 区间相关 | `X` 清除、`Shift+X` 以选中片段设区间、`Shift+Space` 播放区间、`Shift+I` / `Shift+O` 跳到入 / 出点 | 播放器 |
+| 关键帧 | 选中片段后在属性面板给位置、缩放、旋转、透明度打点；`F9` 缓动 | `overrides` |
+| 遮罩 | 属性面板 → 遮罩，矩形 / 椭圆等形状，可反选 | `overrides` |
+| 文字动画 | 逐字 / 逐词 / 逐行的分段动画 | `overrides` 的 `split` |
+| 3D 与可动画特效 | `--fx-z` / `--fx-rx` / `--fx-ry` 做 3D；`--fx-blur`、`--fx-glow`、`--fx-brightness`、`--fx-contrast`、`--fx-saturate`、`--fx-grayscale`、`--fx-invert`、`--fx-hue` 做特效，都能打关键帧 | 片段 `style` |
+| 调色与 LUT | Color 面板；或用 `--of-lut: url(looks/x.cube)` 指定 `.cube` / `.ctf` / `.clf` | 片段 `style` |
+| 抠像 / 美颜 | `--of-cutout: 1` 去背景、`--of-beauty-*` 美颜，本地模型，不上传画面 | 片段 `style` |
+| 响度与导出 | 导出可指定码率或目标文件大小，声音默认对齐 -14 LUFS | 导出面板 |
+
+新增的四个编辑器是插件：剪辑（Edit）、画板（Canvas）、审片（Screening）、调色（Color）。快捷键方案可以在设置里换成 Premiere 或 Final Cut 的。
+
+**注意**：`overrides` 只对原生页面镜头生效，不会反写到 Remotion 的 TSX。要在 Remotion 镜头上做这些效果，仍然要改 TSX 源码后重新 `npm run build`。
+
+`adapter/` 目前没有声明 `frameReadsOverrides`。原生镜头如果需要在 `frame(t)` 里读取被覆盖的 CSS 变量（例如自己画 `--fx-*` 特效），在 `window.film` 上加上 `frameReadsOverrides: true`，宿主会在调用 `frame` 前先应用覆盖。不改也能正常剪辑，只是页面代码读不到那些值。
 
 ## 当前边界
 

@@ -12,7 +12,7 @@
     "test:workflows": "node scripts/verify-workflows.mjs"
   },
   "dependencies": {
-    "openfilm": "0.3.2",
+    "openfilm": "0.4.1",
     "@remotion/player": "4.0.541",
     "@remotion/three": "4.0.541",
     "@react-three/fiber": "9.8.2",
