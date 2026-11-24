@@ -1,0 +1,28 @@
+# Line endings are pinned to LF in the repository, regardless of how a Windows
+# checkout has `core.autocrlf` configured. Without this, every clone on Windows
+# rewrites the whole tree to CRLF and the first real diff is unreadable.
+#
+# `.editorconfig` asks editors for the same thing; this file is what git obeys.
+* text=auto eol=lf
+
+# Binary assets: never text-normalise, never show as diffs.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
+*.mp4 binary
+*.mov binary
+*.webm binary
+*.mp3 binary
+*.wav binary
+*.woff2 binary
+*.glb binary
+*.gltf binary
+*.usd binary
+*.usda binary
+*.blend binary
+
+# Lockfiles churn if a tool rewrites their formatting; make them merge-free and
+# readable in review by leaving them verbatim.
+package-lock.json -diff linguist-generated

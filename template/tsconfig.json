@@ -1,0 +1,36 @@
+{
+  "compilerOptions": {
+    // ---- language ----
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+
+    // ---- strictness ----
+    // `strict` is non-negotiable: these films are one big pure function of the
+    // frame, and an implicit `any` is where cross-frame state hides.
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
+
+    // ---- module / emit ----
+    // noEmit: Remotion bundles through its own webpack pass; tsc is a checker.
+    "noEmit": true,
+    // The tools in tools/ import src/*.ts by explicit extension so Node's
+    // native type stripping can run them with `node tools/x.ts`.
+    "allowImportingTsExtensions": true,
+    // Erasable-only syntax: what makes `node tools/x.ts` work without a build.
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+
+    // tools/checkAssets.ts touches the filesystem.
+    "types": ["node"]
+  },
+  "include": ["src", "tools", "remotion.config.ts"]
+}

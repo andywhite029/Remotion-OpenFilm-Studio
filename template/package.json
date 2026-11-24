@@ -1,0 +1,41 @@
+{
+  "name": "remotion-template",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "程序化视频项目模板：Remotion 4 + React Three Fiber，含设计令牌、时间轴、组件库、校验工具与渲染脚本",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "remotion studio",
+    "compositions": "remotion compositions",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run typecheck && node tools/checkTimeline.ts && node tools/checkAssets.ts && node tools/checkContrast.ts",
+    "doctor": "node scripts/doctor.mjs",
+    "new": "node scripts/new-composition.mjs",
+    "stills": "node scripts/stills.mjs",
+    "render": "node scripts/render.mjs",
+    "render:draft": "node scripts/render.mjs --preset draft",
+    "render:hq": "node scripts/render.mjs --preset hq",
+    "render:master": "node scripts/render.mjs --preset master",
+    "media": "node scripts/media.mjs",
+    "upgrade": "remotion upgrade"
+  },
+  "dependencies": {
+    "@react-three/drei": "10.7.9",
+    "@react-three/fiber": "9.8.2",
+    "@remotion/cli": "4.0.541",
+    "@remotion/three": "4.0.541",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "remotion": "4.0.541",
+    "three": "0.186.1"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.2",
+    "@types/react": "19.3.0",
+    "@types/three": "0.186.0",
+    "typescript": "7.0.2"
+  }
+}

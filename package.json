@@ -1,0 +1,29 @@
+{
+  "name": "remotion-openfilm-studio",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "studio": "node scripts/studio.mjs",
+    "start": "node scripts/studio.mjs --init --build",
+    "new": "node scripts/new-project.mjs",
+    "test": "node scripts/verify.mjs",
+    "test:workflows": "node scripts/verify-workflows.mjs"
+  },
+  "dependencies": {
+    "openfilm": "0.3.2",
+    "@remotion/player": "4.0.541",
+    "@remotion/three": "4.0.541",
+    "@react-three/fiber": "9.8.2",
+    "@react-three/drei": "10.7.9",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "remotion": "4.0.541",
+    "three": "0.186.1"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.12",
+    "playwright-core": "1.61.1"
+  }
+}

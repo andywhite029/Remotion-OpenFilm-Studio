@@ -1,0 +1,18 @@
+/* Shared brand identity only. No palette, layout, logo placement or motion rules. */
+@font-face {
+  font-family: 'IBM Plex Sans SC';
+  src: url('./IBMPlexSansSC-Regular.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'IBM Plex Sans SC';
+  src: url('./IBMPlexSansSC-Bold.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+:root {
+  --brand-font: 'IBM Plex Sans SC', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+}

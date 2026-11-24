@@ -1,0 +1,37 @@
+# ---- dependencies ----
+node_modules/
+
+# ---- render output ----
+# Everything under out/ is regenerated: full renders, stills, scratch clips.
+out/
+.remotion/
+
+# ---- logs ----
+*.log
+npm-debug.log*
+yarn-error.log*
+
+# ---- environment ----
+.env
+.env.*
+!.env.example
+
+# ---- editor / OS ----
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+
+# ---- TypeScript ----
+*.tsbuildinfo
+
+# ---- large media ----
+# Source footage and baked frame sequences are expensive to clone. Keep the
+# README/manifest that describes them tracked, ignore the payloads.
+public/media/*.mp4
+public/media/*.mov
+public/media/*.webm
+public/media/frames/
+public/blender/
+# ...unless a small, curated asset is genuinely part of the template.
+!public/media/.gitkeep

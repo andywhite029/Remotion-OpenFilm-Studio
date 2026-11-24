@@ -1,0 +1,38 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "环境自检",
+      "type": "shell",
+      "command": "npm run doctor",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "打开 Studio 预览",
+      "type": "shell",
+      "command": "npm run dev",
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "全量校验（typecheck + 数据契约）",
+      "type": "shell",
+      "command": "npm run check",
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "出几张静帧",
+      "type": "shell",
+      "command": "npm run stills",
+      "problemMatcher": []
+    },
+    {
+      "label": "渲染草稿",
+      "type": "shell",
+      "command": "npm run render:draft",
+      "problemMatcher": []
+    }
+  ]
+}

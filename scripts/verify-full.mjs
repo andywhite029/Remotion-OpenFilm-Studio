@@ -1,0 +1,4 @@
+import {readFile,writeFile} from 'node:fs/promises';
+const s=JSON.parse(await readFile(new URL('../.studio/session.json',import.meta.url),'utf8'));const headers={'x-studio-key':s.key,'content-type':'application/json'};const url=s.origin+`/api/projects/${s.project.id}/exports`;
+const r=await fetch(url,{method:'POST',headers,body:JSON.stringify({kind:'video',codec:'h264',fps:30,shortEdge:1080,audio:false,hardware:false,name:'Remotion-Studio-full'})});const j=await r.json();if(!r.ok)throw Error(JSON.stringify(j));
+for(let i=0;i<600;i++){const a=await(await fetch(url,{headers})).json();const job=a.exports.find(x=>x.id===j.export.id);if(['done','failed','cancelled'].includes(job.status)){await writeFile(new URL('../verification/full-export.json',import.meta.url),JSON.stringify(job,null,2));console.log(JSON.stringify(job));if(job.status!=='done')process.exitCode=1;break;}await new Promise(r=>setTimeout(r,1000));}

@@ -1,0 +1,4 @@
+node_modules/
+.studio/
+exports/
+projects/**/.film/

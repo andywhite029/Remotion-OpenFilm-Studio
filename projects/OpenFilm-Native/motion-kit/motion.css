@@ -1,0 +1,55 @@
+:root { font-family: var(--brand-font, sans-serif); }
+* { box-sizing: border-box; }
+body,h1,p { margin: 0; }
+body { overflow: hidden; }
+main { height: 100vh; width: 100vw; }
+.eyebrow { font-weight: 700; font-size: 1.25vw; letter-spacing: .15em; }
+
+/* Editorial: typographic poster, ample negative space, one directional wipe. */
+.editorial { background: #ece1ce; color: #28221c; }
+.paper { padding: 6.5vh 8vw; position: relative; isolation: isolate; }
+.paper-head { display: flex; justify-content: space-between; border-bottom: 2px solid #877d6c; padding-bottom: 2.5vh; font-size: 1.4vw; letter-spacing: .16em; }
+.paper-index { position: absolute; z-index: -1; right: 10vw; top: 11vh; font-size: 32vw; line-height: 1; font-weight: 700; color: #dbcdb6; }
+.paper-message { position: relative; margin-top: 9vh; }
+.paper h1,.paper-message p { font-size: 9.5vw; font-weight: 700; line-height: 1.05; letter-spacing: -.052em; }
+.paper-message p { color: #913b23; }
+.reveal { width: fit-content; padding-bottom: .6vh; }
+.second-line { margin: 1.5vh 0 0 7vw; }
+.paper-note { margin-top: 6vh; border-inline-start: .3vw solid #913b23; padding-left: 1.3vw; font-size: 1.55vw; }
+
+/* Evidence: data first, high-contrast track and delayed conclusion. */
+.evidence { background: #101423; color: #f2f2fa; }
+.evidence-layout { padding: 12vh 7vw; display: grid; grid-template-columns: 33% 1fr; align-items: center; gap: 5vw; }
+.evidence .eyebrow { color: #ffc972; margin-bottom: 2.4vh; }
+.evidence h1 { font-size: 4.55vw; line-height: 1.16; letter-spacing: -.04em; }
+.evidence-copy > p:not(.eyebrow) { color: #c5c9dc; line-height: 1.6; font-size: 1.6vw; margin-top: 3vh; }
+.metric { display: flex; align-items: baseline; gap: 1.2vw; border-top: 1px solid #51576b; width: 74%; margin-top: 4vh; padding-top: 1.5vh; color: #ffc972; }
+.metric span { font-size: 1.4vw; }
+.metric strong { font-size: 5.6vw; line-height: 1; font-variant-numeric: tabular-nums; }
+.evidence-chart { border-top: .17vw solid #ffc972; padding: 2.8vh .8vw 0; }
+.chart-header { display: flex; justify-content: space-between; gap: 1vw; font-size: 1.25vw; color: #d1d4e2; }
+.evidence-chart svg { width: 100%; margin-top: 2.5vh; overflow: visible; }
+.chart-grid { stroke: #4b5065; fill: none; stroke-width: 1.4; }
+.chart-ticks { fill: #c9cddd; font-size: 21px; }
+#evidence-line { fill: none; stroke: #ffc972; stroke-width: 6; stroke-linejoin: round; stroke-linecap: round; stroke-dasharray: 1; }
+#evidence-dot { fill: #ffc972; stroke: #101423; stroke-width: 3; }
+
+/* Product: broad context to local focus; the target stays near the callout. */
+.product { background: #e1f1eb; color: #14382e; }
+.product-layout { padding: 7vh 8vw; }
+.product-head { display: grid; grid-template-columns: 1fr auto; gap: 1vw; align-items: end; margin: 2vh 0 4vh; }
+.product-head h1 { font-size: 5.05vw; line-height: 1.15; letter-spacing: -.045em; }
+.product-head p { font-size: 1.45vw; line-height: 1.6; }
+.product-frame { position: relative; height: 50vh; padding: 4vh 4vw; border: 1px solid #649687; background: #bfddd3; overflow: hidden; }
+.capture { height: 100%; border: 1px solid #78a99a; border-radius: 1vw; background: #f1f8f5; overflow: hidden; transform-origin: 42% 73%; }
+.capture-top { height: 7vh; display: flex; justify-content: space-between; align-items: center; padding: 0 1.5vw; border-bottom: 1px solid #aac6bb; font-size: 1.25vw; }
+.capture-body { display: grid; grid-template-columns: 27% 1fr; height: calc(100% - 7vh); }
+.ghost-nav { background: #deebe6; padding: 2vw 1.5vw; }
+.ghost-nav i, .ghost-lines i { display: block; width: 78%; height: 1vh; border-radius: 8px; background: #aac6bb; margin-bottom: 2vh; }
+.ghost-nav i:nth-child(2) { width: 58%; }
+.ghost-nav i:nth-child(3), .ghost-lines i:nth-child(2) { width: 38%; }
+.ghost-content { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 3vh; padding: 2vw 4vw; }
+.ghost-lines { width: 100%; }
+.focus-target { border-radius: .6vw; color: #fff; background: #145944; padding: 1.3vh 1.5vw; font-size: 1.8vw; }
+.callout { position: absolute; right: 4vw; bottom: 5vh; display: flex; align-items: center; gap: 1.3vw; color: #fff; background: #14382e; padding: 1.2vh 1.4vw; font-size: 1.45vw; }
+.callout::before { content: ''; width: 2.4vw; height: 2px; background: #c5eed9; }

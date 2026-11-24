@@ -1,0 +1,14 @@
+node_modules/
+vendor/
+.studio/
+exports/
+verification/
+projects/**/.film/
+projects/**/.git/
+projects/Remotion-Template/scenes/page.js
+projects/ThreeDemo/scenes/page.js
+projects/Remotion-Template/public/brand/
+projects/ThreeDemo/public/brand/
+projects/Remotion-Template/assets/brand/watermarks/
+projects/ThreeDemo/assets/brand/watermarks/
+projects/Remotion-Template/motion-kit/

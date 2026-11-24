@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>数据证据 · 追踪一条线</title>
+  <link rel="stylesheet" href="../public/brand/brand.css">
+  <link rel="stylesheet" href="motion.css">
+</head>
+<body class="evidence" data-motion="evidence" data-duration="5">
+  <main class="evidence-layout">
+    <aside class="evidence-copy">
+      <p id="evidence-kicker" class="eyebrow">证据 / 02</p>
+      <h1 id="evidence-title">看趋势，<br>不只看峰值。</h1>
+      <p id="evidence-note">线条走到这一步，才给数字。让视线按证据出现的顺序移动。</p>
+      <div id="evidence-value" class="metric"><span>末值</span><strong id="evidence-last">71</strong></div>
+    </aside>
+    <div class="evidence-chart">
+      <div class="chart-header"><span>归一化指数</span><span id="evidence-source">演示数据 / 非业务指标</span></div>
+      <svg viewBox="0 0 900 470" role="img" aria-label="一条总体上升的示意折线">
+        <path class="chart-grid" d="M80 40H850 M80 125H850 M80 210H850 M80 295H850 M80 380H850"/>
+        <g class="chart-ticks" text-anchor="end"><text x="59" y="47">100</text><text x="59" y="132">75</text><text x="59" y="217">50</text><text x="59" y="302">25</text><text x="59" y="387">0</text></g>
+        <polyline id="evidence-line" data-values="18,27,25,42,38,56,71" points="80,318.8 208.33,288.2 336.67,295 465,237.2 593.33,250.8 721.67,189.6 850,138.6" pathLength="1"/>
+        <circle id="evidence-dot" r="8"/>
+        <g class="chart-ticks"><text x="80" y="433">起点</text><text x="850" y="433" text-anchor="end">末点</text></g>
+      </svg>
+    </div>
+  </main>
+  <script src="motion.js"></script>
+</body>
+</html>
