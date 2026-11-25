@@ -48,6 +48,42 @@ npm run new -- D:\vscode\MyOpenFilm
 
 改 Remotion 源码后运行 `npm run build` 再刷新 Studio。构建只在 `film.html` 缺失时创建初始剪辑。如果源镜头时长变化，需要检查 Studio 上已有片段的入点和出点。不要删除有人工编辑的 `film.html` 来同步源码。
 
+## 接 UE5 渲染的镜头
+
+分工：**Unreal 负责每个镜头，OpenFilm 负责成片。** UE 用 MRQ/Movie Render Graph 把镜头渲成文件，`npm run ue:link` 把它们接到 `film.html` 里，之后排镜头、裁切、字幕、音轨、导出都在 Studio。
+
+### UE 侧只要守住这几条
+
+1. **1920×1080、30fps**，相机 16:9，画面里不要留 letterbox。
+2. **每镜从第 0 帧渲起**，不要在 UE 里裁。Lumen/TSR 有历史积累，从中间帧起渲与整段渲不一致；裁切在 Studio 的时间线上做。
+3. 关自动曝光，固定 TSR/超分设置，同一镜渲两次要一样。
+4. **声音不要烘进画面**，音效/配乐统一进 Studio 音轨。
+5. 命名可对账：`media/ue/<shotId>.mp4`，或 `media/ue/<shotId>/shot_0001.png` 这样的连续帧。
+6. **格式**：H.264（mp4）最省事。ProRes/EXR 适合做母版，但 Studio 的实时预览只解 h264/vp9/av1，要加 `--reencode` 让工具转一份可播放副本（转码副本写在 `media/ue/_linked/`，不覆盖 UE 的渲染）。
+
+### 用起来
+
+```powershell
+npm run ue:link -- --project projects/MyFilm            # 接进去 / 更新
+npm run ue:link -- --project projects/MyFilm --dry-run   # 只报告，不写文件
+npm run ue:link -- --project projects/MyFilm --order shot-010,shot-020 --lut looks/ue-to-rec709.cube
+npm run test:ue                                          # 端到端验收（用 ffmpeg 造镜头，不需要 UE）
+```
+
+工具会：校验分辨率/帧率/编码 → 序列帧编码成 H.264（1 秒一个关键帧，`+faststart`）→ 在 `film.html` 底部建一条 `ue-shots` 轨道、按顺序排镜头 → 写 `media/ue/manifest.json` 对账。
+
+需要固定顺序或先写死入出点时，放一个 `media/ue/shots.json`：
+
+```json
+{"shots": [{"id": "shot-010", "title": "开场", "in": 0, "out": 4.5}, {"id": "shot-020", "at": 6}]}
+```
+
+### 重新渲染之后
+
+同名文件重渲后**再跑一次 `ue:link` 即可**：工具只换画面（写一个带 mtime 的新文件名，避免浏览器用缓存里那张），`at`、裁切、关键帧、淡入淡出全部原样保留。如果新渲染比剪辑需要的短，工具会停下来报错，而不是悄悄把镜头缩短。
+
+已知边界：需要 alpha 的叠加（UE 元素压在文字/图表上）请走分轨——上层放透明页面，或直接在 UE 里合成；`<video>` 走 H.264 没有 alpha。UE 的色调映射要和交付一致（MRQ 的 Final Image 直接进时间线即可，要保留调色余量就出 EXR + `--lut`）。
+
 ## 品牌素材与动效选型
 
 项目已接入 **IBM Plex Sans SC** 和公司的官方水印原图；字体随项目携带，两套示例都把水印放在独立的 Studio 顶层轨道，可单独替换图样和时长。新片的色调、布局、节奏和转场按内容决定。原生、混合项目都可以在素材面板选用 [三种镜头级动效](projects/OpenFilm-Native/motion-kit/README.md)：编辑型揭幕、数据描线、产品局部聚焦。这三种页面按项目需要加入时间轴。水印在 [品牌资产说明](projects/OpenFilm-Native/public/brand/README.md) 中有完整选法和对齐规则。
@@ -86,6 +122,8 @@ npm run new -- D:\vscode\MyOpenFilm
 ## 验证
 
 推荐先跑 `npm run test:workflows`。它用临时项目启动 Studio，检查构建不改时间轴、原生副本不依赖 Remotion、原生小数时间采样和反向 seek，以及混合时间轴的覆盖保存、重载、WebGL 预览和 H.264 导出，不会编辑当前项目的 `film.html`。它还会从空目录新建一个纯 OpenFilm 副本并真跑一次 `npm ci`：0.4.1 升级后曾出现锁文件仍停在 0.3.2、全新安装直接 EUSAGE 的问题，这条检查就是那次回归的守卫。需要上述 Chromium 和可用的 FFmpeg。
+
+`npm run test:ue` 验收 UE 交接：规格不符的渲染被拒绝且不碰 `film.html`、ProRes 必须显式 `--reencode`、三镜按顺序进轨道而其他轨道逐字节不变、Studio 能播、重渲只换画面并保住裁切、最后导出 H.264。它用 ffmpeg 现造“UE 镜头”，不需要装 UE。
 
 旧的单项验证仍可在另一个终端启动默认混合项目后执行。它们会生成测试状态，不要与正在进行的人工剪辑同时运行。
 

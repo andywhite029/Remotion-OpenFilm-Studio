@@ -8,7 +8,9 @@
     "studio": "node scripts/studio.mjs",
     "start": "node scripts/studio.mjs --init --build",
     "new": "node scripts/new-project.mjs",
+    "ue:link": "node scripts/ue-link.mjs",
     "test": "node scripts/verify.mjs",
+    "test:ue": "node scripts/verify-ue.mjs",
     "test:workflows": "node scripts/verify-workflows.mjs"
   },
   "dependencies": {
